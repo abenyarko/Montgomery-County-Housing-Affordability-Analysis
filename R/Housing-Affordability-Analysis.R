@@ -495,4 +495,654 @@ ACS_housing %>%
     maximum_absolute_difference = max(abs(difference))
   )
 
+#  RATE VS COUNT COMPARISON
 
+
+county_rate <- county_summary$severe_burden_rate[1]
+
+median_count <- median(
+  tract_housing_moe$severe_burden_count,
+  na.rm = TRUE
+)
+
+tract_comparison <- tract_housing_moe %>%
+  mutate(
+    above_county_rate =
+      severe_burden_rate > county_rate,
+    
+    above_median_count =
+      severe_burden_count > median_count,
+    
+    priority_group = case_when(
+      above_county_rate & above_median_count ~
+        "High rate / High count",
+      
+      above_county_rate & !above_median_count ~
+        "High rate / Low count",
+      
+      !above_county_rate & above_median_count ~
+        "Low rate / High count",
+      
+      TRUE ~
+        "Low rate / Low count"
+    )
+  )
+
+# Number of tracts in each group
+tract_comparison %>%
+  count(priority_group) %>%
+  arrange(desc(n))
+
+# Review the median count benchmark
+median_count
+
+county_rate <- county_summary$severe_burden_rate[1]
+
+median_count <- median(
+  tract_housing_moe$severe_burden_count,
+  na.rm = TRUE
+)
+
+# --------------------------------------------
+# 16.2 UPDATE CLASSIFICATION LABELS
+# --------------------------------------------
+
+tract_comparison <- tract_housing_moe %>%
+  mutate(
+    priority_group = case_when(
+      severe_burden_rate > county_rate &
+        severe_burden_count > median_count ~
+        "Above County Rate / Above Median Count",
+      
+      severe_burden_rate > county_rate &
+        severe_burden_count <= median_count ~
+        "Above County Rate / Below Median Count",
+      
+      severe_burden_rate <= county_rate &
+        severe_burden_count > median_count ~
+        "Below County Rate / Above Median Count",
+      
+      TRUE ~
+        "Below County Rate / Below Median Count"
+    )
+  )
+
+# Set legend order
+tract_comparison <- tract_comparison %>%
+  mutate(
+    priority_group = factor(
+      priority_group,
+      levels = c(
+        "Above County Rate / Above Median Count",
+        "Above County Rate / Below Median Count",
+        "Below County Rate / Above Median Count",
+        "Below County Rate / Below Median Count"
+      )
+    )
+  )
+
+# --------------------------------------------
+# 16.3 CREATE FINAL SCATTERPLOT
+# --------------------------------------------
+
+housing_plot_final <- ggplot(
+  tract_comparison,
+  aes(
+    x = severe_burden_rate,
+    y = severe_burden_count,
+    color = priority_group
+  )
+) +
+  
+  geom_point(
+    size = 3,
+    alpha = 0.90
+  ) +
+  
+  # Countywide rate benchmark
+  geom_vline(
+    xintercept = county_rate,
+    linetype = "dashed",
+    color = "#222222",
+    linewidth = 0.7
+  ) +
+  
+  # Median tract count benchmark
+  geom_hline(
+    yintercept = median_count,
+    linetype = "dashed",
+    color = "#222222",
+    linewidth = 0.7
+  ) +
+  
+  # Bold, contrasting colors
+  scale_color_manual(
+    values = c(
+      "Above County Rate / Above Median Count" = "#007F5F",
+      "Above County Rate / Below Median Count" = "#2563EB",
+      "Below County Rate / Above Median Count" = "#EA580C",
+      "Below County Rate / Below Median Count" = "#7C3AED"
+    )
+  ) +
+  
+  # Axis formatting
+  scale_x_continuous(
+    breaks = seq(0, 100, 20),
+    labels = label_percent(scale = 1),
+    limits = c(0, 100),
+    expand = expansion(mult = c(0.01, 0.02))
+  ) +
+  
+  scale_y_continuous(
+    labels = label_comma(),
+    expand = expansion(mult = c(0.02, 0.08))
+  ) +
+  
+  # Titles and labels
+  labs(
+    title = "Housing Burden Rates and Counts Tell Different Stories",
+    
+    subtitle = paste(
+      "232 Montgomery County census tracts |",
+      "ACS 2020–2024"
+    ),
+    
+    x = "Severely rent-burdened households (%)",
+    
+    y = "Estimated severely burdened renter households",
+    
+    color = NULL,
+    
+    caption = paste0(
+      "Source: U.S. Census Bureau, ACS 2020–2024, Table B25070.\n",
+      "Dashed lines: County rate (",
+      round(county_rate, 1),
+      "%) and median tract count (",
+      median_count,
+      ").\n",
+      "Tract estimates are subject to sampling uncertainty."
+    )
+  ) +
+  
+  # Two-row legend
+  guides(
+    color = guide_legend(
+      nrow = 2,
+      byrow = TRUE,
+      override.aes = list(
+        size = 4,
+        alpha = 1
+      )
+    )
+  ) +
+  
+  # Professional theme
+  theme_minimal(base_size = 12) +
+  
+  theme(
+    plot.title = element_text(
+      face = "bold",
+      size = 16,
+      color = "#111827"
+    ),
+    
+    plot.subtitle = element_text(
+      size = 11,
+      color = "#374151",
+      margin = margin(b = 12)
+    ),
+    
+    axis.title = element_text(
+      face = "bold",
+      size = 11,
+      color = "#111827"
+    ),
+    
+    axis.text = element_text(
+      size = 10,
+      color = "#374151"
+    ),
+    
+    panel.grid.minor = element_blank(),
+    
+    panel.grid.major = element_line(
+      color = "#E5E7EB",
+      linewidth = 0.3
+    ),
+    
+    legend.position = "bottom",
+    
+    legend.text = element_text(
+      size = 9,
+      color = "#111827"
+    ),
+    
+    legend.margin = margin(t = 10),
+    
+    plot.caption = element_text(
+      size = 9,
+      color = "#4B5563",
+      hjust = 0,
+      lineheight = 1.2,
+      margin = margin(t = 15)
+    ),
+    
+    plot.margin = margin(
+      t = 20,
+      r = 25,
+      b = 20,
+      l = 20
+    )
+  )
+
+# --------------------------------------------
+# 16.4 DISPLAY GRAPH
+# --------------------------------------------
+
+print(housing_plot_final)
+
+# --------------------------------------------
+# 16.5 EXPORT GRAPH
+# --------------------------------------------
+
+ggsave(
+  filename = "images/housing_burden_scatterplot_final.png",
+  plot = housing_plot_final,
+  width = 12,
+  height = 7,
+  dpi = 300,
+  bg = "white"
+)
+
+ggsave(
+  filename = "images/housing_burden_scatterplot_final.pdf",
+  plot = housing_plot_final,
+  width = 12,
+  height = 7,
+  bg = "white"
+)
+
+# Additional Visualization
+
+install.packages(c("sf", "tigris", "ggplot2", "tidycensus"))
+
+library(tidycensus)
+library(sf)
+library(tigris)
+library(tidyverse)
+library(ggplot2)
+library(scales)
+
+options(tigris_use_cache = TRUE)
+
+census_api_key(
+  "7a6ac1b8913152d11d6c25b3aef7dedafef6271e",
+  install = TRUE,
+  overwrite = TRUE
+)
+
+# Confirm the key is available without displaying it
+nzchar(Sys.getenv("census_api_key"))
+
+ACS_housing_geo <- get_acs(
+  geography = "tract",
+  variables = c(
+    total = "B25070_001",
+    severe = "B25070_010",
+    not_computed = "B25070_011"
+  ),
+  state = "MD",
+  county = "Montgomery",
+  year = 2024,
+  survey = "acs5",
+  output = "wide",
+  geometry = TRUE,
+  cache_table = TRUE
+)
+
+# Inspect the data
+glimpse(ACS_housing_geo)
+
+# Check the number of tracts
+nrow(ACS_housing_geo)
+
+# Review geographic identifiers
+ACS_housing_geo %>%
+  st_drop_geometry() %>%
+  select(
+    GEOID,
+    NAME,
+    totalE,
+    severeE,
+    not_computedE
+  ) %>%
+  head(10)
+
+# --------------------------------------------
+# 17.2 CALCULATE SEVERE HOUSING COST BURDEN
+# --------------------------------------------
+
+ACS_housing_geo <- ACS_housing_geo %>%
+  mutate(
+    eligible_renters = totalE - not_computedE,
+    
+    severe_burden_count = severeE,
+    
+    severe_burden_rate = if_else(
+      eligible_renters > 0,
+      (severe_burden_count / eligible_renters) * 100,
+      NA_real_
+    )
+  )
+
+# Validate calculations
+ACS_housing_geo %>%
+  st_drop_geometry() %>%
+  summarise(
+    total_tracts = n(),
+    missing_rates = sum(is.na(severe_burden_rate)),
+    invalid_rates = sum(
+      severe_burden_rate < 0 |
+        severe_burden_rate > 100,
+      na.rm = TRUE
+    ),
+    total_severe_households = sum(severe_burden_count)
+  )
+
+# --------------------------------------------
+# 17.3 VALIDATE AGAINST ORIGINAL DATA
+# --------------------------------------------
+
+original_tracts <- tract_housing %>%
+  mutate(
+    tract_number = stringr::str_extract(
+      geography,
+      "(?<=Census Tract )[0-9.]+"
+    ),
+    GEOID = paste0(
+      "24031",
+      sprintf(
+        "%06d",
+        round(as.numeric(tract_number) * 100)
+      )
+    )
+  ) %>%
+  select(
+    GEOID,
+    original_count = severe_burden_count,
+    original_rate = severe_burden_rate
+  )
+
+validation <- ACS_housing_geo %>%
+  st_drop_geometry() %>%
+  left_join(original_tracts, by = "GEOID") %>%
+  mutate(
+    count_difference = severe_burden_count - original_count,
+    rate_difference = severe_burden_rate - original_rate
+  )
+
+validation %>%
+  summarise(
+    total_tracts = n(),
+    matched_tracts = sum(!is.na(original_count)),
+    unmatched_tracts = sum(is.na(original_count)),
+    max_count_difference = max(
+      abs(count_difference),
+      na.rm = TRUE
+    ),
+    max_rate_difference = max(
+      abs(rate_difference),
+      na.rm = TRUE
+    )
+  )
+
+# --------------------------------------------
+# 17.4 CLASSIFY SEVERE HOUSING BURDEN RATES
+# --------------------------------------------
+
+library(dplyr)
+library(ggplot2)
+library(sf)
+
+ACS_housing_geo <- ACS_housing_geo %>%
+  mutate(
+    burden_category = case_when(
+      severe_burden_rate < 15 ~ "Below 15%",
+      
+      severe_burden_rate < 25.2 ~ "15% to <25.2%",
+      
+      severe_burden_rate < 40 ~ "25.2% to <40%",
+      
+      severe_burden_rate < 60 ~ "40% to <60%",
+      
+      severe_burden_rate >= 60 ~ "60% or higher",
+      
+      TRUE ~ NA_character_
+    ),
+    
+    burden_category = factor(
+      burden_category,
+      levels = c(
+        "Below 15%",
+        "15% to <25.2%",
+        "25.2% to <40%",
+        "40% to <60%",
+        "60% or higher"
+      )
+    )
+  )
+
+# Check the number of census tracts in each category
+ACS_housing_geo %>%
+  st_drop_geometry() %>%
+  count(burden_category) %>%
+  mutate(
+    percentage = round(n / sum(n) * 100, 1)
+  )
+
+housing_category_summary <- ACS_housing_geo %>%
+  sf::st_drop_geometry() %>%
+  group_by(burden_category) %>%
+  summarise(
+    census_tracts = n(),
+    eligible_renters = sum(eligible_renters),
+    severe_households = sum(severe_burden_count),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    pct_of_tracts = round(
+      census_tracts / sum(census_tracts) * 100,
+      1
+    ),
+    pct_of_severe_households = round(
+      severe_households / sum(severe_households) * 100,
+      1
+    )
+  )
+
+print(housing_category_summary)
+
+burden_colors <- c(
+  "Below 15%" = "#DBEAFE",
+  "15% to <25.2%" = "#93C5FD",
+  "25.2% to <40%" = "#3B82F6",
+  "40% to <60%" = "#1D4ED8",
+  "60% or higher" = "#172554"
+)
+
+# --------------------------------------------
+# 17.6 CREATE CATEGORIZED CHOROPLETH MAP
+# --------------------------------------------
+
+housing_map_categorical <- ggplot(ACS_housing_geo) +
+  
+  geom_sf(
+    aes(fill = burden_category),
+    color = "white",
+    linewidth = 0.12
+  ) +
+  
+  scale_fill_manual(
+    values = burden_colors,
+    drop = FALSE,
+    na.value = "#D1D5DB",
+    name = "Severe rental burden (%)"
+  ) +
+  
+  labs(
+    title = "Geographic Variation in Severe Rental Housing Cost Burden",
+    
+    subtitle = paste(
+      "Montgomery County census tracts |",
+      "ACS 2020–2024\n",
+      "Percentage of eligible renter households spending ≥50% of income on gross rent."
+    ),
+    
+    caption = paste0(
+      "Source: U.S. Census Bureau, ACS 2020–2024, Table B25070.\n",
+      "Severe burden: ≥50% of household income spent on gross rent.\n",
+      "Countywide rate: 25.2%. Categories are descriptive; ",
+      "tract estimates are subject to sampling uncertainty."
+    )
+  ) +
+  
+  theme_void() +
+  
+  theme(
+    plot.title = element_text(
+      face = "bold",
+      size = 15,
+      color = "#111827"
+    ),
+    
+    plot.subtitle = element_text(
+      size = 10,
+      color = "#4B5563",
+      lineheight = 1.2,
+      margin = margin(b = 12)
+    ),
+    
+    legend.position = "right",
+    
+    legend.title = element_text(
+      face = "bold",
+      size = 10
+    ),
+    
+    legend.text = element_text(
+      size = 9
+    ),
+    
+    legend.key.height = grid::unit(0.55, "cm"),
+    
+    legend.key.width = grid::unit(0.55, "cm"),
+    
+    plot.caption = element_text(
+      size = 8,
+      hjust = 0,
+      margin = margin(t = 12)
+    ),
+    
+    plot.margin = margin(15, 20, 15, 20)
+  )
+
+# Display map
+print(housing_map_categorical)
+----------------------------
+
+  # --------------------------------------------
+# 17.7 EXPORT CATEGORIZED MAP
+# --------------------------------------------
+
+ggsave(
+  filename = "images/montgomery_housing_burden_categorical.png",
+  plot = housing_map_categorical,
+  width = 11,
+  height = 7,
+  dpi = 300,
+  bg = "white"
+)
+
+ggsave(
+  filename = "images/montgomery_housing_burden_categorical.pdf",
+  plot = housing_map_categorical,
+  width = 11,
+  height = 7,
+  bg = "white"
+)
+
+ACS_housing_geo %>%
+  sf::st_drop_geometry() %>%
+  summarise(
+    total_tracts = n(),
+    above_county_rate = sum(severe_burden_rate > 25.214924),
+    at_or_below_county_rate = sum(severe_burden_rate <= 25.214924),
+    pct_above_county = round(
+      mean(severe_burden_rate > 25.214924) * 100,
+      1
+    )
+  )
+
+ACS_housing_geo %>%
+  sf::st_drop_geometry() %>%
+  arrange(desc(severe_burden_rate)) %>%
+  select(
+    GEOID,
+    NAME,
+    eligible_renters,
+    severe_burden_count,
+    severe_burden_rate,
+    severeM
+  ) %>%
+  slice_head(n = 10)
+
+ACS_housing_geo %>%
+  sf::st_drop_geometry() %>%
+  mutate(
+    above_county_rate =
+      severe_burden_rate > 25.214924
+  ) %>%
+  group_by(above_county_rate) %>%
+  summarise(
+    census_tracts = n(),
+    severe_households = sum(severe_burden_count),
+    eligible_renters = sum(eligible_renters),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    share_of_severe_households = round(
+      severe_households /
+        sum(severe_households) * 100,
+      1
+    )
+  )
+
+# --------------------------------------------
+# 17.8 SUMMARY BY HOUSING BURDEN CATEGORY
+# --------------------------------------------
+
+housing_category_summary <- ACS_housing_geo %>%
+  st_drop_geometry() %>%
+  group_by(burden_category) %>%
+  summarise(
+    census_tracts = n(),
+    
+    eligible_renters = sum(eligible_renters),
+    
+    severe_households = sum(severe_burden_count),
+    
+    .groups = "drop"
+  ) %>%
+  mutate(
+    pct_of_tracts = round(
+      census_tracts / sum(census_tracts) * 100,
+      1
+    ),
+    
+    pct_of_severe_households = round(
+      severe_households / sum(severe_households) * 100,
+      1
+    )
+  )
+
+print(housing_category_summary)
