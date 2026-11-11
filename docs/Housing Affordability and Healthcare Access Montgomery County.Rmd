@@ -1,0 +1,88 @@
+---
+title: "Severe Rental Housing Cost Burden in Montgomery County, Maryland"
+subtitle: "Geographic Patterns and Implications for PCC Outreach | ACS 2020–2024"
+author: "Anthony Benyarko | November 10, 2026"
+date: ""
+output: 
+  pdf_document:
+    toc: false
+    latex_engine: xelatex
+    number_sections: false
+    fig_caption: true
+geometry: 
+  - margin=0.72in
+fontsize: 10pt
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+## 1. Research Question
+
+How does severe rental housing cost burden vary across Montgomery County census tracts, and what might these geographic differences mean for healthcare access?
+
+## 2. Executive Summary
+
+Housing affordability is an important social determinant of health, as high housing costs may limit the financial resources households have available for healthcare and other essential needs. Using the U.S. Census Bureau's 2020–2024 American Community Survey (ACS) five-year estimates, this analysis examines severe rental housing cost burden across **232** census tracts in Montgomery County, Maryland.
+
+Countywide, an estimated **32,527** renter households (**25.2%** of households for which a rent-to-income ratio could be calculated) spend at least **50%** of their household income on gross rent. Based on point estimates, **111** census tracts had severe rental housing cost burden rates above the county estimate. Together, these census tracts account for **64.2%** of the estimated severely rent-burdened households in Montgomery County.
+
+Many tract-level household estimates are subject to sampling uncertainty. The geographic findings should guide further assessment rather than precise rankings or immediate resource allocation.
+
+These findings highlight the importance of examining both geographic concentration and the number of affected households to inform **community health needs assessments** and **population health planning**. For PCC, these findings offer a starting point for identifying areas for further needs assessment and community partnership discussions. These findings do not establish unmet healthcare needs or identify residents eligible for PCC services. Those questions require validation with **healthcare service data and local partners**.
+
+## 3. Data and Analytical Methods
+
+This descriptive analysis uses the U.S. Census Bureau's 2020–2024 American Community Survey (ACS) five-year estimates, Table B25070, covering **232 census tracts** in Montgomery County, Maryland. Severe rental housing cost burden was defined as spending at least **50% of household income on gross rent**. Rates were calculated using renter households with computable rent-to-income ratios, excluding the ACS Not Computed category.
+
+Data were processed and analyzed in R using tidyverse, tidycensus, sf, and ggplot2. To assess whether areas with higher burden rates also contained larger affected populations, I compared each tract's severe burden rate with its estimated number of severely burdened households. Geographic estimates were compared with the countywide severe burden rate and the median tract count. Validation confirmed matching estimates and calculated rates across all 232 census tracts. Findings are descriptive and do not establish statistically significant geographic differences.
+
+\newpage
+
+## 4. Geographic and Comparative Findings
+**Figure 1 - Geographic Distribution Map**
+
+```{r housing-map, echo=FALSE, fig.align='center', out.width='85%', fig.cap=NULL, echo=FALSE, message=FALSE, warning=FALSE}
+
+knitr::include_graphics(
+  "~/Montgomery-County-Housing-Affordability-Analysis/images/montgomery_housing_burden_categorical-final.png"
+)
+```
+
+**Figure 2 - Rate-Versus-Count Scatterplot**
+```{r , housing-scatterplot, echo=FALSE, fig.align='center', out.width='95%', fig.cap=NULL, echo=FALSE, message=FALSE, warning=FALSE}
+knitr::include_graphics(
+  "~/Montgomery-County-Housing-Affordability-Analysis/images/housing_burden_scatterplot_final.png"
+)
+
+```
+
+\newpage
+
+## 5. Key Geographic Findings
+
+**Figure 1 (Geographic Distribution Map)** illustrates variation in severe rental housing cost burden across Montgomery County census tracts. Based on ACS point estimates, **42 census tracts (18.1%)** have severe burden rates of at least 40%. However, these tracts account for only **20.9%** of the county's estimated severely rent-burdened households.
+
+**Figure 2 (Rate-versus-Count Scatterplot)** compares the percentage of severely rent-burdened households with the estimated number affected in each census tract. Using the countywide rate (25.2%) and median tract count (90.5 households) as descriptive reference points, **85 census tracts (36.6%)** had contrasting classifications: **40 tracts** exceeded the countywide rate but fell below the median count, while **45 tracts** fell below the countywide rate but exceeded the median count.  These findings demonstrate that areas with higher burden rates do not necessarily contain the largest numbers of affected households.
+
+## 6. Implications for Healthcare Access and PCC
+
+Housing affordability is a component of economic stability and an important social determinant of health. Severe rental housing cost burden may limit household resources available for healthcare appointments, medications, transportation, food, and other essential needs.
+
+For PCC, these geographic patterns could inform community health needs assessments, outreach planning, and partnerships with housing and social service organizations. Combining ACS estimates with healthcare service data, patient social needs screening, and community partner insights could help identify areas warranting further investigation.
+
+These findings indicate potential financial pressures, not demonstrated barriers to healthcare access or unmet medical needs.
+
+## 7. Analytical Limitations
+
+ACS five-year estimates are subject to sampling uncertainty, particularly in census tracts with small renter populations. Using an exploratory uncertainty threshold, **156 of 232 tracts (67.2%)** had relative margins of error of at least 50% for their estimated severely rent-burdened household counts, indicating substantial uncertainty in many tract-level estimates. This measure of uncertainty applies to household counts, not directly to the calculated burden rates.
+
+Additionally, the 2020–2024 ACS estimates represent a five-year period rather than current conditions. Geographic comparisons are descriptive and do not establish statistically significant differences or causal relationships. The analysis does not directly measure healthcare access, patient eligibility, or PCC service utilization.
+
+## 8. Three Executive Takeaways for PCC Leadership
+
+**1. Housing affordability represents a substantial community concern.** An estimated **32,527 renter households (25.2%)** experience severe rental housing cost burden in Montgomery County, potentially creating financial pressures relevant to healthcare access.
+
+**2. Both burden rates and affected-household counts are necessary.** Rates identify areas with concentrated housing affordability pressures, while counts indicate the estimated scale of affected households. Both perspectives are valuable for community health planning.
+
+**3. Use geographic findings to guide further assessment.** PCC could integrate ACS indicators with patient-level social needs data, healthcare utilization information, and community partner insights to inform outreach and community needs assessments. ACS estimates alone should not determine intervention priorities.
