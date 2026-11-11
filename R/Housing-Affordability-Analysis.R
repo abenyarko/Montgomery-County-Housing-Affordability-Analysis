@@ -1155,3 +1155,62 @@ housing_category_summary <- ACS_housing_geo %>%
   )
 
 print(housing_category_summary)
+
+
+ggsave(
+  filename = "images/montgomery_housing_burden_categorical-final.png",
+  plot = housing_map_categorical,
+  width = 12,
+  height = 9,
+  dpi = 300,
+  bg = "white"
+)
+
+# 2. CHECK GIT STATUS
+system2("git", "status")
+
+
+# 3. VERIFY REQUIRED PROJECT FILES
+required_files <- c(
+  "docs/Housing Affordability and Healthcare Access Montgomery County.Rmd",
+  "docs/Housing-Affordability-and-Healthcare-Access-Montgomery-County.pdf"
+)
+
+file_check <- data.frame(
+  File = required_files,
+  Exists = file.exists(required_files)
+)
+
+print(file_check)
+
+if (!all(file_check$Exists)) {
+  stop("Some required files are missing. Check their paths before publishing.")
+}
+
+# 4. STAGE PROJECT FILES
+system2(
+  "git",
+  c("add", "docs/", ".gitignore")
+)
+
+# 5. REVIEW STAGED FILES
+system2("git", "diff --cached --stat")
+system2("git", "status")
+
+# 6. COMMIT CHANGES
+system2(
+  "git",
+  c(
+    "commit",
+    "-m",
+    shQuote("Add final housing affordability assessment and documentation")
+  )
+)
+
+# 7. PUSH TO GITHUB
+system2("git", c("push", "origin", "main"))
+
+# 8. VERIFY FINAL STATUS
+system2("git", "status")
+
+cat("\nGitHub publication commands completed. Check output for errors.\n")
