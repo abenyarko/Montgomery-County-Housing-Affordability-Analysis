@@ -749,7 +749,7 @@ ggsave(
   filename = "images/housing_burden_scatterplot_final.png",
   plot = housing_plot_final,
   width = 12,
-  height = 7,
+  height = 9,
   dpi = 300,
   bg = "white"
 )
@@ -995,12 +995,12 @@ housing_map_categorical <- ggplot(ACS_housing_geo) +
     subtitle = paste(
       "Montgomery County census tracts |",
       "ACS 2020–2024\n",
-      "Percentage of eligible renter households spending ≥50% of income on gross rent."
+      "Percentage of eligible renter households spending 50% or more of income on gross rent."
     ),
     
     caption = paste0(
       "Source: U.S. Census Bureau, ACS 2020–2024, Table B25070.\n",
-      "Severe burden: ≥50% of household income spent on gross rent.\n",
+      "Severe burden: 50% or more of household income spent on gross rent.\n",
       "Countywide rate: 25.2%. Categories are descriptive; ",
       "tract estimates are subject to sampling uncertainty."
     )
@@ -1038,7 +1038,7 @@ housing_map_categorical <- ggplot(ACS_housing_geo) +
     legend.key.width = grid::unit(0.55, "cm"),
     
     plot.caption = element_text(
-      size = 8,
+      size = 10,
       hjust = 0,
       margin = margin(t = 12)
     ),
@@ -1057,7 +1057,7 @@ print(housing_map_categorical)
 ggsave(
   filename = "images/montgomery_housing_burden_categorical.png",
   plot = housing_map_categorical,
-  width = 11,
+  width = 10,
   height = 7,
   dpi = 300,
   bg = "white"
@@ -1120,6 +1120,15 @@ ACS_housing_geo %>%
 # --------------------------------------------
 # 17.8 SUMMARY BY HOUSING BURDEN CATEGORY
 # --------------------------------------------
+
+ggsave(
+  filename = "images/montgomery_housing_burden_categorical.png",
+  plot = housing_map_categorical,
+  width = 12,
+  height = 9,
+  dpi = 300,
+  bg = "white"
+)
 
 housing_category_summary <- ACS_housing_geo %>%
   st_drop_geometry() %>%
