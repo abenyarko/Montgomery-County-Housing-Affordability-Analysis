@@ -238,13 +238,13 @@ Montgomery-County-Housing-Affordability-Analysis/
 ├── Montgomery-County-Housing-Affordability-Analysis.Rproj
 │
 ├── R/
-│   └── housing_affordability_analysis.R
+│   └── Housing-Affordability-Analysis.R
 │
 ├── data/
 │   └── Public ACS source data
 │
 ├── docs/
-│   ├── Housing-Affordability-and-Healthcare-Access-Montgomery-County.Rmd
+│   ├── Housing Affordability and Healthcare Access Montgomery County.Rmd
 │   └── Housing-Affordability-and-Healthcare-Access-Montgomery-County.pdf
 │
 └── images/
